@@ -1,1 +1,3 @@
-# personal_scheduler
+# Personal Scheduler
+
+## Description 
