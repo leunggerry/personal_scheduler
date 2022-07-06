@@ -1,5 +1,18 @@
 /** Global Variables
  ******************************************************************************/
+const BUSINESS_HOURS = ["9AM", "10AM", "11AM", "12AM", "1PM", "2PM", "3PM", "4PM", "5PM"];
+const BUSINESS_HOURS_INT = [9, 10, 11, 12, 1, 2, 3, 4, 5];
+var currentDaySchedule = {
+  9: "",
+  10: "",
+  11: "",
+  12: "",
+  1: "",
+  2: "",
+  3: "",
+  4: "",
+  5: "",
+};
 
 /** Function Definitions
  ******************************************************************************/
@@ -8,6 +21,53 @@ var printTodaysDate = function () {
 
   //console.log(currentDayEl);
   currentDayEl.text(getCurrentDay());
+};
+
+var showTimeBlock = function (hour) {
+  var timeBockContainerEl = document.querySelector(".container");
+  var isMorning = hour > 5 ? "AM" : "PM";
+
+  // create row div for hour time block
+  var hourBlockDivEl = document.createElement("div");
+  hourBlockDivEl.classList = "row";
+  hourBlockDivEl.id = "hour-" + hour;
+
+  timeBockContainerEl.appendChild(hourBlockDivEl);
+
+  //show the hour on the right
+  var hourTextEl = document.createElement("span");
+  hourTextEl.classList = "col col-sm-2 border-right hour";
+  hourTextEl.textContent = hour + isMorning;
+  hourBlockDivEl.appendChild(hourTextEl);
+
+  //show events schedule for this hour
+  var eventDescriptionDivEl = document.createElement("div");
+  eventDescriptionDivEl.classList = "col-9 description";
+  var eventDescriptionPEl = document.createElement("p");
+  eventDescriptionPEl.textContent = "hello";
+  eventDescriptionPEl.id = "hourDescription-" + hour;
+
+  hourBlockDivEl.appendChild(eventDescriptionDivEl);
+  eventDescriptionDivEl.appendChild(eventDescriptionPEl);
+
+  //add save button to the end
+  var saveBtnEl = document.createElement("button");
+  saveBtnEl.classList = "col-1 border-left saveBtn";
+  saveBtnEl.id = "saveBtn-" + hour;
+  saveBtnEl.innerHTML = "<span class='oi oi-lock-locked'></span>";
+
+  hourBlockDivEl.appendChild(saveBtnEl);
+};
+
+var showWorkingHours = function () {
+  for (var hour of BUSINESS_HOURS_INT) {
+    showTimeBlock(hour);
+  }
+};
+
+var auditTimeBlock = function (timeBlock) {
+  var currentHour = moment()._d().getTheHour();
+  console.log(currentHour);
 };
 /** Utility function
  ******************************************************************************/
@@ -32,8 +92,6 @@ var getTheHour = function () {
 };
 
 var getTheMinute = function () {
-  //console.log(now.format("h"));
-
   return moment().format("mm");
 };
 
@@ -42,6 +100,49 @@ var getTheTime = function () {
   return moment().format("h:mm a");
 };
 
+var getLocalStorage = function () {
+  currentDaySchedule = JSON.parse(localStorage.getItem("schedule"));
+};
+
+var saveSchedule = function () {
+  localStorage.setItem("schedule", JSON.stringify(currentDaySchedule));
+};
+
 /** Main Program
  ******************************************************************************/
 printTodaysDate();
+//load schedule for the first time
+showWorkingHours();
+
+//time block description is clicked
+$(".container").on("click", "p", function () {
+  //get current text in the element
+  var text = $(this).text().trim();
+  //change to text input area
+  var textInput = $("<textarea>").addClass("form-control").val(text);
+
+  // replace p element with text input element
+  $(this).replaceWith(textInput);
+  textInput.trigger("focus");
+});
+
+//save button was clicked
+$(".container").on("click", "button", function () {
+  console.log($(this));
+  //get the update event
+  var text = $("textarea").val().trim();
+
+  var [_btn, hour] = this.id.split("-");
+
+  //update schedule
+  currentDaySchedule[hour] = text;
+  console.log(currentDaySchedule);
+
+  //update local storage
+  saveSchedule();
+
+  //recreate the p element
+  var eventDescriptionPEl = $("<p>").text(text);
+  eventDescriptionPEl.classList = "col-9 description";
+  $("textarea").replaceWith(eventDescriptionPEl);
+});
