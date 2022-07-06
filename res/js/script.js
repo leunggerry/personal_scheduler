@@ -33,13 +33,17 @@ var showTimeBlock = function (hour) {
 
   //show events schedule for this hour
   var eventDescriptionDivEl = document.createElement("div");
-  eventDescriptionDivEl.classList = "col-9 description";
+  eventDescriptionDivEl.classList = "col-9 description hour-description-" + hour;
   var eventDescriptionPEl = document.createElement("p");
   eventDescriptionPEl.textContent = currentDaySchedule[hour];
   eventDescriptionPEl.id = "hourDescription-" + hourNum[0];
 
+  //append event description to hour Block div
   hourBlockDivEl.appendChild(eventDescriptionDivEl);
   eventDescriptionDivEl.appendChild(eventDescriptionPEl);
+
+  //checkSchedule time block
+  auditTimeBlock(eventDescriptionDivEl);
 
   //add save button to the end
   var saveBtnEl = document.createElement("button");
@@ -60,8 +64,34 @@ var showWorkingHours = function () {
 };
 
 var auditTimeBlock = function (timeBlock) {
-  var currentHour = moment()._d().getTheHour();
-  console.log(currentHour);
+  var currentHour = getTheHour24Hr();
+
+  //get the paragraph block
+  var descriptionEl = $(timeBlock).find("p");
+  //get timeBlock hour
+  var descriptionHour = $(descriptionEl).attr("id");
+  var descriptionHourNum = parseInt(descriptionHour.match(/[0-9]+/));
+
+  //check description hour and use 24hr clock to make easier to calc
+  if (descriptionHourNum < 9) {
+    descriptionHourNum += 12;
+  }
+
+  //remove old classes
+  $(timeBlock).removeClass("past present future");
+  //it is currently that hour block
+  if (currentHour === descriptionHourNum) {
+    $(timeBlock).addClass("present");
+  }
+  //time hasnt past
+  else if (currentHour < descriptionHourNum) {
+    $(timeBlock).addClass("future");
+  }
+  // time has past
+  else {
+    $(timeBlock).addClass("past");
+  }
+  //console.log(descriptionHour);
 };
 /** Utility function
  ******************************************************************************/
@@ -79,6 +109,9 @@ var getCurrentDay = function () {
   return now.format("dddd, MMMM Do YYYY");
 };
 
+var getTheHour24Hr = function () {
+  return moment().format("H");
+};
 var getTheHour = function () {
   return moment().format("h");
 };
@@ -167,3 +200,11 @@ $(".container").on("click", "button", function () {
   eventDescriptionPEl.classList = "col-9 description";
   $("textarea").replaceWith(eventDescriptionPEl);
 });
+
+// set a time to keep checking tasks to make sure the correct color
+// category is applied
+setInterval(function () {
+  $(".description .hour-description").each(function (index, el) {
+    auditTimeBlock(el);
+  });
+}, 1000 * 60 * 5); //execute code every 5 mins
