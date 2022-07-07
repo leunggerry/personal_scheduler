@@ -72,15 +72,21 @@ var auditTimeBlock = function (timeBlock) {
   var descriptionHour = $(descriptionEl).attr("id");
   var descriptionHourNum = parseInt(descriptionHour.match(/[0-9]+/));
 
-  //check description hour and use 24hr clock to make easier to calc
+  //check description hour
   if (descriptionHourNum < 9) {
     descriptionHourNum += 12;
   }
 
+  // console.log(currentHour);
+  // console.log(typeof currentHour)
+  // console.log(descriptionHourNum);
+  // console.log(typeof(descriptionHourNum));
   //remove old classes
   $(timeBlock).removeClass("past present future");
   //it is currently that hour block
-  if (currentHour === descriptionHourNum) {
+  if (currentHour == descriptionHourNum) {
+    console.log("present");
+
     $(timeBlock).addClass("present");
   }
   //time hasnt past
@@ -91,19 +97,11 @@ var auditTimeBlock = function (timeBlock) {
   else {
     $(timeBlock).addClass("past");
   }
-  //console.log(descriptionHour);
 };
 /** Utility function
  ******************************************************************************/
 var getCurrentDay = function () {
   var now = moment();
-  //   var day = now._d.getDate();
-  //   var month = now._d.getMonth();
-  //   var year = now._d.getFullYear();
-  //   console.log(now);
-  //   console.log(day);
-  //   console.log(month);
-  //   console.log(year);
 
   //console.log(now.format("dddd, MMMM Do YYYY"));
   return now.format("dddd, MMMM Do YYYY");
@@ -167,38 +165,45 @@ printTodaysDate();
 showWorkingHours();
 
 //time block description is clicked
-$(".container").on("click", "p", function () {
+$(".container").on("click", "div", function () {
+  var paraEl = $(this).find("p");
+  var paraId = $(paraEl).attr("id");
   //get current text in the element
-  var text = $(this).text().trim();
+  var text = $(paraEl).text().trim();
   //change to text input area
   var textInput = $("<textarea>").addClass("form-control").val(text);
-
+  textInput.attr("id", paraId);
   // replace p element with text input element
-  $(this).replaceWith(textInput);
+  $(paraEl).replaceWith(textInput);
   textInput.trigger("focus");
 });
 
 //save button was clicked
 $(".container").on("click", "button", function () {
-  console.log($(this));
   //get the update event
-  var text = $("textarea").val().trim();
+  var textAreaEl = $("textarea");
+  //var textAreaParent = $(textAreaEl).parent();
+  //var text = textAreaEl.textContent;
+  console.log(text);
+  var text = $(textAreaEl).val().trim();
+  var textAreaId = textAreaEl.attr("id");
+  //var textAreaId = textAreaEl.id;
 
   var [_btn, hour] = this.id.split("-");
 
   var hourBlockStr = getHourString(hour);
-  console.log(hourBlockStr);
+
   //update schedule
   currentDaySchedule[hourBlockStr] = text;
-  console.log(currentDaySchedule);
 
   //update local storage
   saveSchedule();
 
   //recreate the p element
   var eventDescriptionPEl = $("<p>").text(text);
-  eventDescriptionPEl.classList = "col-9 description";
-  $("textarea").replaceWith(eventDescriptionPEl);
+  eventDescriptionPEl.attr("id", textAreaId);
+  console.log($(eventDescriptionPEl));
+  $(textAreaEl).replaceWith(eventDescriptionPEl);
 });
 
 // set a time to keep checking tasks to make sure the correct color
