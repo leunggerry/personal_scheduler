@@ -6,6 +6,9 @@ var currentDaySchedule = {};
 
 /** Function Definitions
  ******************************************************************************/
+/**
+ * @description Show current day
+ */
 var printTodaysDate = function () {
   var currentDayEl = $("#currentDay");
 
@@ -13,6 +16,10 @@ var printTodaysDate = function () {
   currentDayEl.text(getCurrentDay());
 };
 
+/**
+ * @description load a time block into each html element along with a save button
+ * @param {*} hour
+ */
 var showTimeBlock = function (hour) {
   var timeBockContainerEl = document.querySelector(".container");
   var hourNum = hour.match(/[0-9]+/); // get only the hour
@@ -54,6 +61,9 @@ var showTimeBlock = function (hour) {
   hourBlockDivEl.appendChild(saveBtnEl);
 };
 
+/**
+ * @description Wrapper to loop through business hours to show current working day
+ */
 var showWorkingHours = function () {
   // check if we have a schedule in localstorage
   var schedule = getSchedule();
@@ -63,6 +73,11 @@ var showWorkingHours = function () {
   }
 };
 
+/**
+ * @description modify the time block to update it with the appropriate colours
+ *
+ * @param {*} timeBlock
+ */
 var auditTimeBlock = function (timeBlock) {
   var currentHour = getTheHour24Hr();
 
